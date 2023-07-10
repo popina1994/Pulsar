@@ -17,11 +17,32 @@ namespace Pulsar
 		
 		BookDepth(): m_vBids(NUM_BIDS_TO_KEEP), m_vAsks(NUM_BIDS_TO_KEEP) {}
 
+		BookDepth(const std::vector<PriceQuantity>& vBids, const std::vector<PriceQuantity>& vAsks):
+			BookDepth()
+		{
+			int idx = 0;
+			for (const auto& bid : vBids)
+			{
+				m_vBids[idx] = bid;
+				idx++;
+			}
+			idx = 0;
+			for (const auto& ask : vAsks)
+			{
+				m_vAsks[idx] = ask;
+				idx++;
+			}
+			m_nBids = m_vBids.size();
+			m_nAsks = m_vAsks.size();
+		}
+
 		void clear(void) { 
 			m_nBids = 0;
 			m_nAsks = 0;
+			/*
 			std::fill(m_vBids.begin(), m_vBids.end(), 0.0);
 			std::fill(m_vAsks.begin(), m_vAsks.end(), 0.0);
+			*/
 		}
 	};
 }

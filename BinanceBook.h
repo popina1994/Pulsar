@@ -20,7 +20,7 @@ namespace Pulsar
     public:
 
         BinanceBook(){}
-
+        
         // Clear the book
         void clear(void)
         {
@@ -59,17 +59,18 @@ namespace Pulsar
         {
             m_bookDepth = bookDepth;
         }
-
+        
         // Apply a new best bid / ask.
+        
         void update_bbo(const PriceQuantity& newBid, const PriceQuantity& newAsk)
         {
-            uint32_t idxBid;
-            uint32_t idxAsk;
+            int32_t idxBid;
+            int32_t idxAsk;
             bool cutBids = false;
             bool equalBid = false;
             bool cutAsks = false;
             bool equalAsk = false;
-
+            
             for (idxBid = m_bookDepth.m_nBids; idxBid > 0; idxBid--)
             {
                 if (m_bookDepth.m_vBids[idxBid].price > newBid.price)
@@ -84,18 +85,19 @@ namespace Pulsar
                     break;
                 }
             }
+            
+            
             if (cutBids)
             {
-                if (idxBid == 0)
+                for (int32_t idx = m_bookDepth.m_nBids - 1; idx >= idxBid; idx--)
                 {
-                    for (int32_t idx = m_bookDepth.m_nBids - 1; idx >= idxBid; idx--)
-                    {
-                        m_bookDepth.m_vBids[idx + 1] = m_bookDepth.m_vBids[idx];
-                    }
+                    m_bookDepth.m_vBids[idx - idxBid + 1] = m_bookDepth.m_vBids[idx];
                 }
-                m_bookDepth.m_vBids[0] = newBid;
+                m_bookDepth.m_vBids[idxBid] = newBid;
             }
+            
 
+            
             for (idxAsk = m_bookDepth.m_nAsks; idxAsk > 0; idxAsk--)
             {
                 if (m_bookDepth.m_vAsks[idxAsk].price < newAsk.price)
@@ -112,25 +114,26 @@ namespace Pulsar
             }
             if (cutAsks)
             {
-                if (idxAsk == 0)
+                for (int32_t idx = m_bookDepth.m_nAsks - 1; idx >= idxAsk; idx--)
                 {
-                    for (int32_t idx = m_bookDepth.m_nAsks - 1; idx >= idxAsk; idx--)
-                    {
-                        m_bookDepth.m_vAsks[idx + 1] = m_bookDepth.m_vAsks[idx];
-                    }
+                    m_bookDepth.m_vAsks[idx - idxAsk + 1] = m_bookDepth.m_vAsks[idx];
                 }
-                m_bookDepth.m_vAsks[0] = newAsk;
+                m_bookDepth.m_vAsks[idxAsk] = newAsk;
             }
+            
         }
 
+        
         // Retrieve the book (in canonical order).
         // This should output something similar to the input for `replace()`.
+        
         const BookDepth& extract(void)
         {
             return m_bookDepth;
         }
+        
 
-
+        
         // to_string() - convert to string for output.
         // This should be efficient but isn't performance critical.
         const std::string to_string(void) const
@@ -149,6 +152,7 @@ namespace Pulsar
                 return ss.str();
             }
         }
+        
     };
 }
 
