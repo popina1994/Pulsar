@@ -32,17 +32,15 @@ namespace Pulsar
 				m_vAsks[idx] = ask;
 				idx++;
 			}
-			m_nBids = m_vBids.size();
-			m_nAsks = m_vAsks.size();
+			m_nBids = vBids.size();
+			m_nAsks = vAsks.size();
 		}
 
 		void clear(void) { 
 			m_nBids = 0;
 			m_nAsks = 0;
-			/*
-			std::fill(m_vBids.begin(), m_vBids.end(), 0.0);
-			std::fill(m_vAsks.begin(), m_vAsks.end(), 0.0);
-			*/
+			std::fill(m_vBids.begin(), m_vBids.end(), PriceQuantity{ 0.0, 0.0});
+			std::fill(m_vAsks.begin(), m_vAsks.end(), PriceQuantity{ 0.0, 0.0});
 		}
 	};
 }

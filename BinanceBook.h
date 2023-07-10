@@ -66,22 +66,19 @@ namespace Pulsar
         {
             int32_t idxBid;
             int32_t idxAsk;
-            bool cutBids = false;
-            bool equalBid = false;
-            bool cutAsks = false;
-            bool equalAsk = false;
+            bool cutBids = true;
+            bool cutAsks = true;
             
             for (idxBid = m_bookDepth.m_nBids; idxBid > 0; idxBid--)
             {
-                if (m_bookDepth.m_vBids[idxBid].price > newBid.price)
+                if (m_bookDepth.m_vBids[idxBid-1].price > newBid.price)
                 {
-                    cutBids = true;
                     break;
                 }
-                if (m_bookDepth.m_vBids[idxBid].price == newBid.price)
+                if (m_bookDepth.m_vBids[idxBid-1].price == newBid.price)
                 {
-                    equalBid = true;
-                    m_bookDepth.m_vBids[idxBid].quantity = newBid.quantity;
+                    cutBids = false;
+                    m_bookDepth.m_vBids[idxBid-1].quantity = newBid.quantity;
                     break;
                 }
             }
@@ -100,15 +97,13 @@ namespace Pulsar
             
             for (idxAsk = m_bookDepth.m_nAsks; idxAsk > 0; idxAsk--)
             {
-                if (m_bookDepth.m_vAsks[idxAsk].price < newAsk.price)
+                if (m_bookDepth.m_vAsks[idxAsk-1].price < newAsk.price)
                 {
-                    cutAsks = true;
                     break;
                 }
-                if (m_bookDepth.m_vAsks[idxAsk].price == newAsk.price)
+                if (m_bookDepth.m_vAsks[idxAsk-1].price == newAsk.price)
                 {
-                    equalBid = true;
-                    m_bookDepth.m_vAsks[idxAsk].quantity = newAsk.quantity;
+                    m_bookDepth.m_vAsks[idxAsk-1].quantity = newAsk.quantity;
                     break;
                 }
             }
