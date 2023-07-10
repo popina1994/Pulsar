@@ -128,7 +128,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BinanceBook.cpp" />
+    <ClCompile Include="BookDepth.cpp" />
+    <ClCompile Include="BookTicker.cpp" />
+    <ClCompile Include="PriceQuantity.cpp" />
     <ClCompile Include="Pulsar.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="BinanceBook.h" />
+    <ClInclude Include="BookDepth.h" />
+    <ClInclude Include="BookTicker.h" />
+    <ClInclude Include="PriceQuantity.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Readme.MD" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
