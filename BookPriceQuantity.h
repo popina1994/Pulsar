@@ -113,6 +113,10 @@ namespace Pulsar
 			{
 				if (idxCut == 0)
 				{
+					if (m_nEntrs == m_vBook.size())
+					{
+						m_vBook.push_back({ 0.0, 0.0 });
+					}
 					for (int32_t idx = (int32_t)m_nEntrs - 1; idx >= (int32_t)idxCut; idx--)
 					{
 						m_vBook[idx - idxCut + 1] = m_vBook[idx];

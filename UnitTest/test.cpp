@@ -99,3 +99,27 @@ TEST(BinanceBook, UpdateBbo) {
 
 	EXPECT_NEAR(asksAfter2[0].quantity, 10, ROUNDING_ERROR);
 }
+
+
+TEST(BinanceBook, UpdateBboEmpty) {
+	using namespace Pulsar;
+	BinanceBook book;
+
+	std::vector<PriceQuantity> vBids = { {99, 1}, {97, 2}, {95, 3} };
+	std::vector<PriceQuantity> vAsks = { {101, 4}, {103, 5}, {105, 6} };
+
+	for (double idx = 0; idx < 25; idx++)
+	{
+		book.update_bbo({idx, idx + 1 }, { 100 - idx, 100 - idx - 1 });
+		const auto& [bidsAfter2, asksAfter2] = book.extract();
+
+		EXPECT_EQ(bidsAfter2.getNumEntries(), idx + 1);
+		EXPECT_NEAR(bidsAfter2[0].price, idx, ROUNDING_ERROR);
+		EXPECT_NEAR(bidsAfter2[0].quantity, idx +1, ROUNDING_ERROR);
+
+		EXPECT_EQ(asksAfter2.getNumEntries(), idx + 1);
+		EXPECT_NEAR(asksAfter2[0].price, 100 - idx, ROUNDING_ERROR);
+		EXPECT_NEAR(asksAfter2[0].quantity, 100 - idx - 1, ROUNDING_ERROR);
+	}
+	
+}
