@@ -9,9 +9,6 @@
 
 namespace Pulsar
 {	
-	/**
-	* @brief L denotes the direction in which the largest 
-	*/
 	struct BookPriceQuantity
 	{
 		static constexpr uint32_t NUM_BIDS_TO_KEEP = 21;
@@ -98,7 +95,7 @@ namespace Pulsar
 						priceQuantity,
 						[](const PriceQuantity& info, const PriceQuantity& priceQuantityIn)
 						{
-							return info.price <= priceQuantityIn.price;
+							return info.price < priceQuantityIn.price;
 						});
 					idxCut = priceIt - m_vBook.begin();
 					if ((idxCut < numEntrs) && (m_vBook[idxCut].price == priceQuantity.price))

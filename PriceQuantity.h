@@ -5,6 +5,7 @@ namespace Pulsar
 {
 	using Price = double;
 	using Quantity = double;
+	constexpr double ROUNDING_ERROR = 1e-15;
 
 	struct PriceQuantity
 	{

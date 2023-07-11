@@ -2,7 +2,7 @@
 #include "../BinanceBook.h"
 #include "../BookDepth.h"
 
-constexpr double ROUNDING_ERROR = 1e-15;
+using Pulsar::ROUNDING_ERROR;
 TEST(BinanceBook, Initial) {
 	using namespace Pulsar;
 	BinanceBook book;

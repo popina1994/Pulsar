@@ -73,31 +73,37 @@ namespace Pulsar
             size_t nAsks = m_vAsks.getNumEntries();
             for (size_t idx = 0; idx < maxEntries; idx++)
             {
-                ss << "[" << std::format("{:<2}", idx + 1) << "] ";
+                ss << "[" << std::format("{:3}", idx + 1) << "] ";
                 if (idx < nBids)
                 {
-                    ss << "[" << std::format("{:<7}", m_vBids[idx].quantity) << "]";
-                    ss << " " << std::format("{:<7}", m_vBids[idx].price) << " | ";
+                    ss << "[" << std::format("{: 10.5f}", m_vBids[idx].quantity) << "]";
+                    ss << " " << std::format("{:<10.3f}", m_vBids[idx].price) << " | ";
                 }
                 else
                 {
-                    ss << "[" << std::format("{:<7}", "-") << "]";
-                    ss << "[" << std::format("{:<7}", "-") << "]";
+                    ss << "[" << std::format("{:<10}", "-") << "]";
+                    ss << "[" << std::format("{:<10}", "-") << "]";
                 }
                 if (idx < nAsks)
                 {
-                    ss << " " << std::format("{:<7}", m_vAsks[idx].price);
-                    ss << "[" << std::format("{:<7}", m_vAsks[idx].quantity) << "]";
+                    ss << " " << std::format("{:10.3f}", m_vAsks[idx].price);
+                    ss << "[" << std::format("{:<10.5f}", m_vAsks[idx].quantity) << "]";
                 }
                 else
                 {
-                    ss << "[" << std::format("{:<7}", "-") << "]";
-                    ss << "[" << std::format("{:<7}", "-") << "]"; 
+                    ss << "[" << std::format("{:<10}", "-") << "]";
+                    ss << "[" << std::format("{:<10}", "-") << "]";
                 }
-                
                 ss << std::endl;
-                return ss.str();
             }
+            
+            return ss.str();
+        }
+
+        friend std::ostream& operator<<(std::ostream& out, const BinanceBook& book)
+        {
+            out << book.to_string();
+            return out;
         }
         
     };
