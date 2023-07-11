@@ -6,6 +6,9 @@
 
 namespace Pulsar
 {
+	/**
+	* @brief Basic book that passes bids and asks to the Binance book.
+	*/
 	template <typename Container> requires std::ranges::contiguous_range<Container>
 	struct BookDepth
 	{

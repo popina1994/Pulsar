@@ -13,7 +13,10 @@
 
 namespace Pulsar
 {
-    // template?
+    /**
+    * @brief Class that allows adding bids and asks, applying BBO updates, clearing existing book, 
+    * and printing the book to the output.
+    */
     template <typename ContainerGl> requires std::ranges::contiguous_range<ContainerGl>
     class BinanceBook
     {
@@ -23,22 +26,28 @@ namespace Pulsar
 
         BinanceBook(){}
         
-        // Clear the book
+        /**
+        * @brief Clearing existing bids and asks.
+        */
         void clear(void)
         {
             m_vAsks.clear();
             m_vBids.clear();
         }
 
-        // Test whether book is empty.
+        /**
+        * @brief Return true if the book is empthy, otherwise false.
+        */
         bool is_empty(void) const
         {
-            return (m_vAsks.getNumEntries() == 0) && (m_vBids.getNumEntries() == 0);
+            return (m_vAsks.size() == 0) && (m_vBids.size() == 0);
         }
 
-        // Replace entire contents of book with given bids / asks (assumed to be in canonical order).
-        // Bonus: accept any suitable container of 
-        // TODO: https://stackoverflow.com/questions/7728478/c-template-class-function-with-arbitrary-container-type-how-to-define-it
+        /**
+        * @brief Replaces the entire contents of book with given bids and asks(assumed to be in canonical order).
+        * @note Bonus: accept any suitable container of 
+        * https://stackoverflow.com/questions/7728478/c-template-class-function-with-arbitrary-container-type-how-to-define-it
+        */ 
         template <typename Container>  requires std::ranges::contiguous_range<Container>
         void replace(const Container& vAsks, const Container& vBids)
         {
@@ -46,6 +55,9 @@ namespace Pulsar
             m_vBids.replace(vBids);
         }
 
+        /**
+        * @brief Replaces the entire contents of book with given bids and asks(assumed to be in canonical order).
+        */
         template <typename Container> requires std::ranges::contiguous_range<Container>
         void replace(const BookDepth<Container>& bookDepth)
         {
@@ -53,7 +65,9 @@ namespace Pulsar
             m_vBids.replace(bookDepth.m_vBids);
         }
         
-        // Apply a new best bid / ask.
+        /**
+        * @brief Apply a new best bid / ask.
+        */ 
         void update_bbo(const PriceQuantity& newBid, const PriceQuantity& newAsk)
         {
             m_vBids.template cut<QUANTITY::GREATER>(newBid);
@@ -61,21 +75,24 @@ namespace Pulsar
         }
 
         
-        // Retrieve the book (in canonical order).
-        // This should output something similar to the input for `replace()`.
-        const std::pair<BookPriceQuantity<ContainerGl>&, BookPriceQuantity<ContainerGl>&> extract(void)
+        /** 
+        * @brief Retrieve the book(in canonical order). This should output something similar to the input for `replace()`.
+        */ 
+        // 
+        const std::pair<const ContainerGl&, const ContainerGl&> extract(void)
         {
-            return std::make_pair(std::ref(m_vBids), std::ref(m_vAsks));
+            return std::make_pair(std::cref(m_vBids.getBook()), std::cref(m_vAsks.getBook()));
         }
         
-        // to_string() - convert to string for output.
-        // This should be efficient but isn't performance critical.
+        /**
+        * @brief convert to string for output.
+        */ 
         const std::string to_string(void) const
         {
             std::stringstream ss;
-            size_t maxEntries = std::max(m_vAsks.getNumEntries(), m_vBids.getNumEntries());
-            size_t nBids = m_vBids.getNumEntries();
-            size_t nAsks = m_vAsks.getNumEntries();
+            size_t nBids = m_vBids.size();
+            size_t nAsks = m_vAsks.size();
+            size_t maxEntries = std::max(nBids, nAsks);
             for (size_t idx = 0; idx < maxEntries; idx++)
             {
                 ss << "[" << std::format("{:3}", idx + 1) << "] ";

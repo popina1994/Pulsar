@@ -38,7 +38,7 @@ TEST(BinanceBook, UpdateBbo) {
 	book.replace(bd);
 	EXPECT_EQ(book.is_empty(), false);
 	const auto& [bids, asks] = book.extract();
-	EXPECT_EQ(bids.getNumEntries(), 3);
+	EXPECT_EQ(bids.size(), 3);
 	EXPECT_NEAR(bids[0].price, 99, ROUNDING_ERROR);
 	EXPECT_NEAR(bids[1].price, 97, ROUNDING_ERROR);
 	EXPECT_NEAR(bids[2].price, 95, ROUNDING_ERROR);
@@ -47,7 +47,7 @@ TEST(BinanceBook, UpdateBbo) {
 	EXPECT_NEAR(bids[1].quantity, 2, ROUNDING_ERROR);
 	EXPECT_NEAR(bids[2].quantity, 3, ROUNDING_ERROR);
 
-	EXPECT_EQ(asks.getNumEntries(), 3);
+	EXPECT_EQ(asks.size(), 3);
 	EXPECT_NEAR(asks[0].price, 101, ROUNDING_ERROR);
 	EXPECT_NEAR(asks[1].price, 103, ROUNDING_ERROR);
 	EXPECT_NEAR(asks[2].price, 105, ROUNDING_ERROR);
@@ -59,7 +59,7 @@ TEST(BinanceBook, UpdateBbo) {
 	book.update_bbo({ 100, 7 }, { 102, 8 });
 	const auto& [bidsAfter, asksAfter] = book.extract();
 
-	EXPECT_EQ(bidsAfter.getNumEntries(), 4);
+	EXPECT_EQ(bidsAfter.size(), 4);
 	EXPECT_NEAR(bidsAfter[0].price, 100, ROUNDING_ERROR);
 	EXPECT_NEAR(bidsAfter[1].price, 99, ROUNDING_ERROR);
 	EXPECT_NEAR(bidsAfter[2].price, 97, ROUNDING_ERROR);
@@ -70,7 +70,7 @@ TEST(BinanceBook, UpdateBbo) {
 	EXPECT_NEAR(bidsAfter[2].quantity, 2, ROUNDING_ERROR);
 	EXPECT_NEAR(bidsAfter[3].quantity, 3, ROUNDING_ERROR);
 
-	EXPECT_EQ(asksAfter.getNumEntries(), 3);
+	EXPECT_EQ(asksAfter.size(), 3);
 	EXPECT_NEAR(asksAfter[0].price, 102, ROUNDING_ERROR);
 	EXPECT_NEAR(asksAfter[1].price, 103, ROUNDING_ERROR);
 	EXPECT_NEAR(asksAfter[2].price, 105, ROUNDING_ERROR);
@@ -83,7 +83,7 @@ TEST(BinanceBook, UpdateBbo) {
 	book.update_bbo({ 100, 9 }, { 106, 10 });
 	const auto& [bidsAfter2, asksAfter2] = book.extract();
 
-	EXPECT_EQ(bidsAfter2.getNumEntries(), 4);
+	EXPECT_EQ(bidsAfter2.size(), 4);
 	EXPECT_NEAR(bidsAfter2[0].price, 100, ROUNDING_ERROR);
 	EXPECT_NEAR(bidsAfter2[1].price, 99, ROUNDING_ERROR);
 	EXPECT_NEAR(bidsAfter2[2].price, 97, ROUNDING_ERROR);
@@ -94,7 +94,7 @@ TEST(BinanceBook, UpdateBbo) {
 	EXPECT_NEAR(bidsAfter2[2].quantity, 2, ROUNDING_ERROR);
 	EXPECT_NEAR(bidsAfter2[3].quantity, 3, ROUNDING_ERROR);
 
-	EXPECT_EQ(asksAfter2.getNumEntries(), 1);
+	EXPECT_EQ(asksAfter2.size(), 1);
 	EXPECT_NEAR(asksAfter2[0].price, 106, ROUNDING_ERROR);
 
 	EXPECT_NEAR(asksAfter2[0].quantity, 10, ROUNDING_ERROR);
@@ -114,11 +114,11 @@ TEST(BinanceBook, UpdateBboEmpty) {
 		book.update_bbo({idx, idx + 1 }, { LIMIT - idx, LIMIT - idx - 1 });
 		const auto& [bidsAfter2, asksAfter2] = book.extract();
 
-		EXPECT_EQ(bidsAfter2.getNumEntries(), idx + 1);
+		EXPECT_EQ(bidsAfter2.size(), idx + 1);
 		EXPECT_NEAR(bidsAfter2[0].price, idx, ROUNDING_ERROR);
 		EXPECT_NEAR(bidsAfter2[0].quantity, idx +1, ROUNDING_ERROR);
 
-		EXPECT_EQ(asksAfter2.getNumEntries(), idx + 1);
+		EXPECT_EQ(asksAfter2.size(), idx + 1);
 		EXPECT_NEAR(asksAfter2[0].price, LIMIT - idx, ROUNDING_ERROR);
 		EXPECT_NEAR(asksAfter2[0].quantity, LIMIT - idx - 1, ROUNDING_ERROR);
 	}

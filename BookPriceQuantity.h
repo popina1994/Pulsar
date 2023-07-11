@@ -15,17 +15,21 @@ namespace Pulsar
 		LESS = 1
 	};
 
+	/*** 
+	* @brief A class that encodes the logic of applying BBOs, and replacing offers and bids. 
+	*/
 	template <typename Container> requires std::ranges::contiguous_range<Container>
 	struct BookPriceQuantity
 	{
 		static constexpr uint32_t NUM_BIDS_TO_KEEP = 21;
+		static constexpr uint32_t ALLOCATE = 10000;
 		Container m_vBook; // or could be e.g. boost::static_vector/small_vector
 	public:
 		
 
 		BookPriceQuantity() 
 		{
-			m_vBook.reserve(NUM_BIDS_TO_KEEP);
+			m_vBook.reserve(ALLOCATE);
 		}
 
 		BookPriceQuantity(Container& vPriceQuant) :
@@ -39,6 +43,11 @@ namespace Pulsar
 			}
 		}
 
+		const Container& getBook(void) const
+		{
+			return m_vBook;
+		}
+
 		void clear(void)
 		{
 			m_vBook.clear();
@@ -50,7 +59,7 @@ namespace Pulsar
 			m_vBook.assign(vPriceQuantity.begin(), vPriceQuantity.end());
 		}
 
-		size_t getNumEntries(void) const
+		size_t size(void) const
 		{
 			return m_vBook.size();
 		}
@@ -151,9 +160,6 @@ namespace Pulsar
 				}
 				else
 				{
-					//101 | 103 | 105
-					//0    1      2    3
-					//101 | 103 | 105 | 106
 					for (int32_t idx = (int32_t)idxCut; idx < (int32_t)numEntrs; idx++)
 					{
 						m_vBook[idx - idxCut + 1] = m_vBook[idx];
