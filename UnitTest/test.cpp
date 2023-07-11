@@ -37,45 +37,45 @@ TEST(BinanceBook, UpdateBbo) {
 	EXPECT_EQ(book.is_empty(), true);
 	book.replace(bd);
 	EXPECT_EQ(book.is_empty(), false);
-	auto bookAfter = book.extract();
-	EXPECT_EQ(bookAfter.m_nBids, 3);
-	EXPECT_NEAR(bookAfter.m_vBids[0].price, 99, ROUNDING_ERROR);
-	EXPECT_NEAR(bookAfter.m_vBids[1].price, 97, ROUNDING_ERROR);
-	EXPECT_NEAR(bookAfter.m_vBids[2].price, 95, ROUNDING_ERROR);
+	const auto& [bids, asks] = book.extract();
+	EXPECT_EQ(bids.getNumEntries(), 3);
+	EXPECT_NEAR(bids[0].price, 99, ROUNDING_ERROR);
+	EXPECT_NEAR(bids[1].price, 97, ROUNDING_ERROR);
+	EXPECT_NEAR(bids[2].price, 95, ROUNDING_ERROR);
 
-	EXPECT_NEAR(bookAfter.m_vBids[0].quantity, 1, ROUNDING_ERROR);
-	EXPECT_NEAR(bookAfter.m_vBids[1].quantity, 2, ROUNDING_ERROR);
-	EXPECT_NEAR(bookAfter.m_vBids[2].quantity, 3, ROUNDING_ERROR);
+	EXPECT_NEAR(bids[0].quantity, 1, ROUNDING_ERROR);
+	EXPECT_NEAR(bids[1].quantity, 2, ROUNDING_ERROR);
+	EXPECT_NEAR(bids[2].quantity, 3, ROUNDING_ERROR);
 
-	EXPECT_EQ(bookAfter.m_nAsks, 3);
-	EXPECT_NEAR(bookAfter.m_vAsks[0].price, 101, ROUNDING_ERROR);
-	EXPECT_NEAR(bookAfter.m_vAsks[1].price, 103, ROUNDING_ERROR);
-	EXPECT_NEAR(bookAfter.m_vAsks[2].price, 105, ROUNDING_ERROR);
+	EXPECT_EQ(asks.getNumEntries(), 3);
+	EXPECT_NEAR(asks[0].price, 101, ROUNDING_ERROR);
+	EXPECT_NEAR(asks[1].price, 103, ROUNDING_ERROR);
+	EXPECT_NEAR(asks[2].price, 105, ROUNDING_ERROR);
 
-	EXPECT_NEAR(bookAfter.m_vAsks[0].quantity, 4, ROUNDING_ERROR);
-	EXPECT_NEAR(bookAfter.m_vAsks[1].quantity, 5, ROUNDING_ERROR);
-	EXPECT_NEAR(bookAfter.m_vAsks[2].quantity, 6, ROUNDING_ERROR);
+	EXPECT_NEAR(asks[0].quantity, 4, ROUNDING_ERROR);
+	EXPECT_NEAR(asks[1].quantity, 5, ROUNDING_ERROR);
+	EXPECT_NEAR(asks[2].quantity, 6, ROUNDING_ERROR);
 
 	book.update_bbo({ 100, 7 }, { 102, 8 });
-	bookAfter = book.extract();
+	const auto& [bidsAfter, asksAfter] = book.extract();
 
-	EXPECT_EQ(bookAfter.m_nBids, 4);
-	EXPECT_NEAR(bookAfter.m_vBids[0].price, 100, ROUNDING_ERROR);
-	EXPECT_NEAR(bookAfter.m_vBids[1].price, 99, ROUNDING_ERROR);
-	EXPECT_NEAR(bookAfter.m_vBids[2].price, 97, ROUNDING_ERROR);
-	EXPECT_NEAR(bookAfter.m_vBids[3].price, 95, ROUNDING_ERROR);
+	EXPECT_EQ(bidsAfter.getNumEntries(), 4);
+	EXPECT_NEAR(bidsAfter[0].price, 100, ROUNDING_ERROR);
+	EXPECT_NEAR(bidsAfter[1].price, 99, ROUNDING_ERROR);
+	EXPECT_NEAR(bidsAfter[2].price, 97, ROUNDING_ERROR);
+	EXPECT_NEAR(bidsAfter[3].price, 95, ROUNDING_ERROR);
 
-	EXPECT_NEAR(bookAfter.m_vBids[0].quantity, 7, ROUNDING_ERROR);
-	EXPECT_NEAR(bookAfter.m_vBids[1].quantity, 1, ROUNDING_ERROR);
-	EXPECT_NEAR(bookAfter.m_vBids[2].quantity, 2, ROUNDING_ERROR);
-	EXPECT_NEAR(bookAfter.m_vBids[3].quantity, 3, ROUNDING_ERROR);
+	EXPECT_NEAR(bidsAfter[0].quantity, 7, ROUNDING_ERROR);
+	EXPECT_NEAR(bidsAfter[1].quantity, 1, ROUNDING_ERROR);
+	EXPECT_NEAR(bidsAfter[2].quantity, 2, ROUNDING_ERROR);
+	EXPECT_NEAR(bidsAfter[3].quantity, 3, ROUNDING_ERROR);
 
-	EXPECT_EQ(bookAfter.m_nAsks, 3);
-	EXPECT_NEAR(bookAfter.m_vAsks[0].price, 102, ROUNDING_ERROR);
-	EXPECT_NEAR(bookAfter.m_vAsks[1].price, 103, ROUNDING_ERROR);
-	EXPECT_NEAR(bookAfter.m_vAsks[2].price, 105, ROUNDING_ERROR);
+	EXPECT_EQ(asksAfter.getNumEntries(), 3);
+	EXPECT_NEAR(asksAfter[0].price, 102, ROUNDING_ERROR);
+	EXPECT_NEAR(asksAfter[1].price, 103, ROUNDING_ERROR);
+	EXPECT_NEAR(asksAfter[2].price, 105, ROUNDING_ERROR);
 
-	EXPECT_NEAR(bookAfter.m_vAsks[0].quantity, 8, ROUNDING_ERROR);
-	EXPECT_NEAR(bookAfter.m_vAsks[1].quantity, 5, ROUNDING_ERROR);
-	EXPECT_NEAR(bookAfter.m_vAsks[2].quantity, 6, ROUNDING_ERROR);
+	EXPECT_NEAR(asksAfter[0].quantity, 8, ROUNDING_ERROR);
+	EXPECT_NEAR(asksAfter[1].quantity, 5, ROUNDING_ERROR);
+	EXPECT_NEAR(asksAfter[2].quantity, 6, ROUNDING_ERROR);
 }

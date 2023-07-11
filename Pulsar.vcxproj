@@ -130,6 +130,7 @@
   <ItemGroup>
     <ClCompile Include="BinanceBook.cpp" />
     <ClCompile Include="BookDepth.cpp" />
+    <ClCompile Include="BookPriceQuantity.cpp" />
     <ClCompile Include="BookTicker.cpp" />
     <ClCompile Include="PriceQuantity.cpp" />
     <ClCompile Include="Pulsar.cpp" />
@@ -137,6 +138,7 @@
   <ItemGroup>
     <ClInclude Include="BinanceBook.h" />
     <ClInclude Include="BookDepth.h" />
+    <ClInclude Include="BookPriceQuantity.h" />
     <ClInclude Include="BookTicker.h" />
     <ClInclude Include="PriceQuantity.h" />
   </ItemGroup>

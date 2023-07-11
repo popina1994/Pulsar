@@ -30,6 +30,9 @@
     <ClCompile Include="BookTicker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="BookPriceQuantity.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PriceQuantity.h">
@@ -42,6 +45,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BookTicker.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BookPriceQuantity.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include "BookTicker.h"
+#include "BookPriceQuantity.h"
 #include "BookDepth.h"
 #include <sstream>
 #include <format>
@@ -13,10 +14,8 @@ namespace Pulsar
     // template?
     class BinanceBook
     {
-        
-        BookDepth m_bookDepth;
-        // I did not understand what is the minimal size of books to be held. 
-        // In order to reduce the latency I would keep just a specific number of bids/offers (up to 20).
+        BookPriceQuantity m_vAsks;
+        BookPriceQuantity m_vBids;
     public:
 
         BinanceBook(){}
@@ -24,13 +23,14 @@ namespace Pulsar
         // Clear the book
         void clear(void)
         {
-            m_bookDepth.clear();
+            m_vAsks.clear();
+            m_vBids.clear();
         }
 
         // Test whether book is empty.
         bool is_empty(void) const
         {
-            return (m_bookDepth.m_nBids == 0) && (m_bookDepth.m_nAsks == 0);
+            return (m_vAsks.getNumEntries() == 0) && (m_vBids.getNumEntries() == 0);
         }
 
         // Replace entire contents of book with given bids / asks (assumed to be in canonical order).
@@ -38,111 +38,63 @@ namespace Pulsar
         // TODO: https://stackoverflow.com/questions/7728478/c-template-class-function-with-arbitrary-container-type-how-to-define-it
         void replace(const std::vector<PriceQuantity>& vAsks, const std::vector<PriceQuantity>& vBids)
         {
-            m_bookDepth.m_nAsks = vAsks.size();
-            uint32_t idx = 0; 
-            for (const auto& ask : vAsks)
-            {
-                m_bookDepth.m_vAsks[idx] = ask;
-                idx++;
-            }
-
-            m_bookDepth.m_nBids = vBids.size();
-            idx = 0;
-            for (const auto& bid: vBids)
-            {
-                m_bookDepth.m_vBids[idx] = bid;
-                idx++;
-            }
+            m_vAsks.replace(vAsks);
+            m_vBids.replace(vBids);
         }
 
         void replace(const BookDepth& bookDepth)
         {
-            m_bookDepth = bookDepth;
+            m_vAsks.replace(bookDepth.m_vAsks);
+            m_vBids.replace(bookDepth.m_vBids);
         }
         
         // Apply a new best bid / ask.
-        
         void update_bbo(const PriceQuantity& newBid, const PriceQuantity& newAsk)
         {
-            int32_t idxBid;
-            int32_t idxAsk;
-            bool cutBids = true;
-            bool cutAsks = true;
-            
-            for (idxBid = m_bookDepth.m_nBids; idxBid > 0; idxBid--)
-            {
-                if (m_bookDepth.m_vBids[idxBid-1].price > newBid.price)
-                {
-                    break;
-                }
-                if (m_bookDepth.m_vBids[idxBid-1].price == newBid.price)
-                {
-                    cutBids = false;
-                    m_bookDepth.m_vBids[idxBid-1].quantity = newBid.quantity;
-                    break;
-                }
-            }
-            
-            
-            if (cutBids)
-            {
-                for (int32_t idx = m_bookDepth.m_nBids - 1; idx >= idxBid; idx--)
-                {
-                    m_bookDepth.m_vBids[idx - idxBid + 1] = m_bookDepth.m_vBids[idx];
-                }
-                m_bookDepth.m_vBids[idxBid] = newBid;
-            }
-            
-
-            
-            for (idxAsk = m_bookDepth.m_nAsks; idxAsk > 0; idxAsk--)
-            {
-                if (m_bookDepth.m_vAsks[idxAsk-1].price < newAsk.price)
-                {
-                    break;
-                }
-                if (m_bookDepth.m_vAsks[idxAsk-1].price == newAsk.price)
-                {
-                    m_bookDepth.m_vAsks[idxAsk-1].quantity = newAsk.quantity;
-                    break;
-                }
-            }
-            if (cutAsks)
-            {
-                for (int32_t idx = m_bookDepth.m_nAsks - 1; idx >= idxAsk; idx--)
-                {
-                    m_bookDepth.m_vAsks[idx - idxAsk + 1] = m_bookDepth.m_vAsks[idx];
-                }
-                m_bookDepth.m_vAsks[idxAsk] = newAsk;
-            }
-            
+            m_vBids.template cut<BookPriceQuantity::QUANTITY::GREATER>(newBid);
+            m_vAsks.template cut<BookPriceQuantity::QUANTITY::LESS>(newAsk);
         }
 
         
         // Retrieve the book (in canonical order).
         // This should output something similar to the input for `replace()`.
-        
-        const BookDepth& extract(void)
+        const std::pair<BookPriceQuantity&, BookPriceQuantity&> extract(void)
         {
-            return m_bookDepth;
+            return std::make_pair(std::ref(m_vBids), std::ref(m_vAsks));
         }
-        
-
         
         // to_string() - convert to string for output.
         // This should be efficient but isn't performance critical.
         const std::string to_string(void) const
         {
             std::stringstream ss;
-            uint32_t maxEntries = std::max(m_bookDepth.m_nAsks, m_bookDepth.m_nBids);
-            for (int idx = 0; idx < maxEntries; idx++)
+            size_t maxEntries = std::max(m_vAsks.getNumEntries(), m_vBids.getNumEntries());
+            size_t nBids = m_vBids.getNumEntries();
+            size_t nAsks = m_vAsks.getNumEntries();
+            for (size_t idx = 0; idx < maxEntries; idx++)
             {
-                std::format("{:<6}", 42);
                 ss << "[" << std::format("{:<2}", idx + 1) << "] ";
-                ss << "[" << std::format("{:<7}", m_bookDepth.m_vBids[idx].quantity) << "]";
-                ss << " " << std::format("{:<7}", m_bookDepth.m_vBids[idx].price) << " | ";
-                ss << " " << std::format("{:<7}", m_bookDepth.m_vAsks[idx].price);
-                ss << "[" << std::format("{:<7}", m_bookDepth.m_vAsks[idx].quantity) << "]";
+                if (idx < nBids)
+                {
+                    ss << "[" << std::format("{:<7}", m_vBids[idx].quantity) << "]";
+                    ss << " " << std::format("{:<7}", m_vBids[idx].price) << " | ";
+                }
+                else
+                {
+                    ss << "[" << std::format("{:<7}", "-") << "]";
+                    ss << "[" << std::format("{:<7}", "-") << "]";
+                }
+                if (idx < nAsks)
+                {
+                    ss << " " << std::format("{:<7}", m_vAsks[idx].price);
+                    ss << "[" << std::format("{:<7}", m_vAsks[idx].quantity) << "]";
+                }
+                else
+                {
+                    ss << "[" << std::format("{:<7}", "-") << "]";
+                    ss << "[" << std::format("{:<7}", "-") << "]"; 
+                }
+                
                 ss << std::endl;
                 return ss.str();
             }
