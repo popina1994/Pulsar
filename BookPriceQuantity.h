@@ -81,58 +81,56 @@ namespace Pulsar
 		{
 			size_t idxCut;
 			bool isCut = true;
-			if constexpr (L == QUANTITY::GREATER)
+			
+			for (idxCut = m_nEntrs; idxCut > 0; idxCut--)
 			{
-				for (idxCut = m_nEntrs; idxCut > 0; idxCut--)
+				if constexpr (L == QUANTITY::GREATER)
 				{
 					if (m_vBook[idxCut - 1].price > priceQuantity.price)
 					{
-						idxCut--;
-						break;
-					}
-					if (m_vBook[idxCut - 1].price == priceQuantity.price)
-					{
-						isCut = false;
-						m_vBook[idxCut - 1].quantity = priceQuantity.quantity;
+						isCut = true;
 						break;
 					}
 				}
-
-
-				if (isCut)
-				{
-					for (int32_t idx = (int32_t)m_nEntrs - 1; idx >= idxCut; idx--)
-					{
-						m_vBook[idx - idxCut + 1] = m_vBook[idx];
-					}
-					m_vBook[idxCut] = priceQuantity;
-				}
-			}
-			else if constexpr (L == QUANTITY::LESS)
-			{
-				for (idxCut = m_nEntrs; idxCut > 0; idxCut--)
+				else if constexpr (L == QUANTITY::LESS)
 				{
 					if (m_vBook[idxCut - 1].price < priceQuantity.price)
 					{
-						idxCut--;
-						break;
-					}
-					if (m_vBook[idxCut - 1].price == priceQuantity.price)
-					{
-						isCut = false;
-						m_vBook[idxCut - 1].quantity = priceQuantity.quantity;
+						isCut = true;
 						break;
 					}
 				}
-				if (isCut)
+					
+				if (m_vBook[idxCut - 1].price == priceQuantity.price)
 				{
+					isCut = false;
+					m_vBook[idxCut - 1].quantity = priceQuantity.quantity;
+					break;
+				}
+			}
 
-					for (int32_t idx = (int32_t)m_nEntrs - 1; idx >= idxCut; idx--)
+			if (isCut)
+			{
+				if (idxCut == 0)
+				{
+					for (int32_t idx = (int32_t)m_nEntrs - 1; idx >= (int32_t)idxCut; idx--)
 					{
 						m_vBook[idx - idxCut + 1] = m_vBook[idx];
 					}
-					m_vBook[idxCut] = priceQuantity;
+					m_nEntrs++;
 				}
+				else
+				{
+					//101 | 103 | 105
+					//0    1      2    3
+					//101 | 103 | 105 | 106
+					for (int32_t idx = (int32_t)idxCut; idx < (int32_t)m_nEntrs; idx++)
+					{
+						m_vBook[idx - idxCut + 1] = m_vBook[idx];
+					}
+					m_nEntrs = m_nEntrs - idxCut + 1; 
+				}
+				m_vBook[0] = priceQuantity;
 			}
 		}
 	};
