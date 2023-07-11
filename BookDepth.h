@@ -6,13 +6,14 @@
 
 namespace Pulsar
 {
+	template <typename Container> requires std::ranges::contiguous_range<Container>
 	struct BookDepth
 	{
-		std::vector<PriceQuantity> m_vBids;
-		std::vector<PriceQuantity> m_vAsks; // or could be e.g. boost::static_vector/small_vector
+		Container m_vBids;
+		Container m_vAsks; // or could be e.g. boost::static_vector/small_vector
 		
 
-		BookDepth(const std::vector<PriceQuantity>& vBids, const std::vector<PriceQuantity>& vAsks)
+		BookDepth(const Container& vBids, const Container& vAsks)
 			: m_vBids(vBids), m_vAsks(vAsks)
 		{
 		}

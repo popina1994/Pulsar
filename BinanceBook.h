@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <string>
+#include <ranges>
+#include <iterator>
 #include "BookTicker.h"
 #include "BookPriceQuantity.h"
 #include "BookDepth.h"
@@ -12,10 +14,11 @@
 namespace Pulsar
 {
     // template?
+    template <typename ContainerGl> requires std::ranges::contiguous_range<ContainerGl>
     class BinanceBook
     {
-        BookPriceQuantity m_vAsks;
-        BookPriceQuantity m_vBids;
+        BookPriceQuantity<ContainerGl> m_vAsks;
+        BookPriceQuantity<ContainerGl> m_vBids;
     public:
 
         BinanceBook(){}
@@ -36,13 +39,15 @@ namespace Pulsar
         // Replace entire contents of book with given bids / asks (assumed to be in canonical order).
         // Bonus: accept any suitable container of 
         // TODO: https://stackoverflow.com/questions/7728478/c-template-class-function-with-arbitrary-container-type-how-to-define-it
-        void replace(const std::vector<PriceQuantity>& vAsks, const std::vector<PriceQuantity>& vBids)
+        template <typename Container>  requires std::ranges::contiguous_range<Container>
+        void replace(const Container& vAsks, const Container& vBids)
         {
             m_vAsks.replace(vAsks);
             m_vBids.replace(vBids);
         }
 
-        void replace(const BookDepth& bookDepth)
+        template <typename Container> requires std::ranges::contiguous_range<Container>
+        void replace(const BookDepth<Container>& bookDepth)
         {
             m_vAsks.replace(bookDepth.m_vAsks);
             m_vBids.replace(bookDepth.m_vBids);
@@ -51,14 +56,14 @@ namespace Pulsar
         // Apply a new best bid / ask.
         void update_bbo(const PriceQuantity& newBid, const PriceQuantity& newAsk)
         {
-            m_vBids.template cut<BookPriceQuantity::QUANTITY::GREATER>(newBid);
-            m_vAsks.template cut<BookPriceQuantity::QUANTITY::LESS>(newAsk);
+            m_vBids.template cut<QUANTITY::GREATER>(newBid);
+            m_vAsks.template cut<QUANTITY::LESS>(newAsk);
         }
 
         
         // Retrieve the book (in canonical order).
         // This should output something similar to the input for `replace()`.
-        const std::pair<BookPriceQuantity&, BookPriceQuantity&> extract(void)
+        const std::pair<BookPriceQuantity<ContainerGl>&, BookPriceQuantity<ContainerGl>&> extract(void)
         {
             return std::make_pair(std::ref(m_vBids), std::ref(m_vAsks));
         }

@@ -9,23 +9,26 @@
 
 namespace Pulsar
 {	
+	enum class QUANTITY
+	{
+		GREATER = 0,
+		LESS = 1
+	};
+
+	template <typename Container> requires std::ranges::contiguous_range<Container>
 	struct BookPriceQuantity
 	{
 		static constexpr uint32_t NUM_BIDS_TO_KEEP = 21;
-		std::vector<PriceQuantity> m_vBook; // or could be e.g. boost::static_vector/small_vector
+		Container m_vBook; // or could be e.g. boost::static_vector/small_vector
 	public:
-		enum class QUANTITY
-		{
-			GREATER = 0, 
-			LESS = 1
-		};
+		
 
 		BookPriceQuantity() 
 		{
 			m_vBook.reserve(NUM_BIDS_TO_KEEP);
 		}
 
-		BookPriceQuantity(const std::vector<PriceQuantity>& vPriceQuant) :
+		BookPriceQuantity(Container& vPriceQuant) :
 			BookPriceQuantity()
 		{
 			uint32_t idx = 0;
@@ -41,7 +44,8 @@ namespace Pulsar
 			m_vBook.clear();
 		}
 
-		void replace(const std::vector<PriceQuantity>& vPriceQuantity)
+		template <typename Container2> requires std::ranges::contiguous_range<Container2>
+		void replace(const Container2& vPriceQuantity)
 		{
 			m_vBook.assign(vPriceQuantity.begin(), vPriceQuantity.end());
 		}

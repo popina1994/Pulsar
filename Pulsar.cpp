@@ -9,7 +9,7 @@
 void testInitial(void)
 {
 	using namespace Pulsar;
-	BinanceBook book;
+	BinanceBook<std::vector<PriceQuantity>> book;
 	EXPECT_EQ(book.is_empty(), true);
 	book.clear();
 	EXPECT_EQ(book.is_empty(), true);
@@ -18,7 +18,7 @@ void testInitial(void)
 void testSimpleInsertion(void)
 {
 	using namespace Pulsar;
-	BinanceBook book;
+	BinanceBook<std::vector<PriceQuantity>> book;
 
 	std::vector<PriceQuantity> vBids = { {20078.54, 0.00431} };
 	std::vector<PriceQuantity> vAsks = { {20078.91000000,0.03437000}};
@@ -35,7 +35,7 @@ void testSimpleInsertion(void)
 void testUpdateBbo(void)
 {
 	using namespace Pulsar;
-	BinanceBook book;
+	BinanceBook<std::vector<PriceQuantity>> book;
 
 	std::vector<PriceQuantity> vBids = { {99, 1}, {97, 2}, {95, 3} };
 	std::vector<PriceQuantity> vAsks = { {101, 4}, {103, 5}, {105, 6} };
@@ -111,7 +111,7 @@ void testUpdateBbo(void)
 void testUpdateBboEmpty(void)
 {
 	using namespace Pulsar;
-	BinanceBook book;
+	BinanceBook<std::vector<PriceQuantity>> book;
 
 	std::vector<PriceQuantity> vBids = { {99, 1}, {97, 2}, {95, 3} };
 	std::vector<PriceQuantity> vAsks = { {101, 4}, {103, 5}, {105, 6} };
