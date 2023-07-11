@@ -107,10 +107,11 @@ TEST(BinanceBook, UpdateBboEmpty) {
 
 	std::vector<PriceQuantity> vBids = { {99, 1}, {97, 2}, {95, 3} };
 	std::vector<PriceQuantity> vAsks = { {101, 4}, {103, 5}, {105, 6} };
+	constexpr double LIMIT = 1000;
 
-	for (double idx = 0; idx < 25; idx++)
+	for (double idx = 0; idx < LIMIT / 2; idx++)
 	{
-		book.update_bbo({idx, idx + 1 }, { 100 - idx, 100 - idx - 1 });
+		book.update_bbo({idx, idx + 1 }, { LIMIT - idx, LIMIT - idx - 1 });
 		const auto& [bidsAfter2, asksAfter2] = book.extract();
 
 		EXPECT_EQ(bidsAfter2.getNumEntries(), idx + 1);
@@ -118,8 +119,7 @@ TEST(BinanceBook, UpdateBboEmpty) {
 		EXPECT_NEAR(bidsAfter2[0].quantity, idx +1, ROUNDING_ERROR);
 
 		EXPECT_EQ(asksAfter2.getNumEntries(), idx + 1);
-		EXPECT_NEAR(asksAfter2[0].price, 100 - idx, ROUNDING_ERROR);
-		EXPECT_NEAR(asksAfter2[0].quantity, 100 - idx - 1, ROUNDING_ERROR);
+		EXPECT_NEAR(asksAfter2[0].price, LIMIT - idx, ROUNDING_ERROR);
+		EXPECT_NEAR(asksAfter2[0].quantity, LIMIT - idx - 1, ROUNDING_ERROR);
 	}
-	
 }

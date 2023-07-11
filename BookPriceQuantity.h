@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <type_traits>
 #include <concepts>
+#include <iterator>
 #include "PriceQuantity.h"
 
 namespace Pulsar
@@ -14,9 +15,7 @@ namespace Pulsar
 	struct BookPriceQuantity
 	{
 		static constexpr uint32_t NUM_BIDS_TO_KEEP = 21;
-
 		std::vector<PriceQuantity> m_vBook; // or could be e.g. boost::static_vector/small_vector
-		size_t m_nEntrs = 0;
 	public:
 		enum class QUANTITY
 		{
@@ -24,7 +23,10 @@ namespace Pulsar
 			LESS = 1
 		};
 
-		BookPriceQuantity() : m_vBook(NUM_BIDS_TO_KEEP) {}
+		BookPriceQuantity() 
+		{
+			m_vBook.reserve(NUM_BIDS_TO_KEEP);
+		}
 
 		BookPriceQuantity(const std::vector<PriceQuantity>& vPriceQuant) :
 			BookPriceQuantity()
@@ -35,34 +37,23 @@ namespace Pulsar
 				m_vBook[idx] = priceQuant;
 				idx++;
 			}
-			m_nEntrs = vPriceQuant.size();
 		}
 
-		void clear(void) {
-			m_nEntrs = 0;
-			std::fill(m_vBook.begin(), m_vBook.end(), PriceQuantity{ 0.0, 0.0 });
+		void clear(void)
+		{
+			m_vBook.clear();
 		}
 
 		void replace(const std::vector<PriceQuantity>& vPriceQuantity)
 		{
-			size_t idx = 0;
-			for (const auto& priceQuant : vPriceQuantity)
-			{
-				m_vBook[idx] = priceQuant;
-				idx++;
-			}
-			m_nEntrs = vPriceQuantity.size();
+			m_vBook.assign(vPriceQuantity.begin(), vPriceQuantity.end());
 		}
 
 		size_t getNumEntries(void) const
 		{
-			return m_nEntrs;
+			return m_vBook.size();
 		}
 
-		void setNumEntries(size_t numEntries)
-		{
-			m_nEntrs = numEntries;
-		}
 
 		template <typename T> requires std::integral<T>
 		PriceQuantity& operator[](T idx)
@@ -81,58 +72,92 @@ namespace Pulsar
 		{
 			size_t idxCut;
 			bool isCut = true;
-			
-			for (idxCut = m_nEntrs; idxCut > 0; idxCut--)
+			size_t numEntrs = m_vBook.size();
+			if (numEntrs >= NUM_BIDS_TO_KEEP)
 			{
 				if constexpr (L == QUANTITY::GREATER)
 				{
-					if (m_vBook[idxCut - 1].price > priceQuantity.price)
+					auto priceIt = std::lower_bound(
+						m_vBook.begin(), m_vBook.end(),
+						priceQuantity,
+						[](const PriceQuantity& info, const PriceQuantity& priceQuantityIn)
+						{
+							return info.price > priceQuantityIn.price;
+						});
+					idxCut = priceIt - m_vBook.begin();
+					if ((idxCut < numEntrs) && (m_vBook[idxCut].price == priceQuantity.price))
 					{
-						isCut = true;
-						break;
+						isCut = false;
+						m_vBook[idxCut].quantity = priceQuantity.quantity;
 					}
 				}
 				else if constexpr (L == QUANTITY::LESS)
 				{
-					if (m_vBook[idxCut - 1].price < priceQuantity.price)
+					auto priceIt = std::lower_bound(
+						m_vBook.begin(), m_vBook.end(),
+						priceQuantity,
+						[](const PriceQuantity& info, const PriceQuantity& priceQuantityIn)
+						{
+							return info.price <= priceQuantityIn.price;
+						});
+					idxCut = priceIt - m_vBook.begin();
+					if ((idxCut < numEntrs) && (m_vBook[idxCut].price == priceQuantity.price))
 					{
-						isCut = true;
+						isCut = false;
+						m_vBook[idxCut].quantity = priceQuantity.quantity;
+					}
+				}
+			}
+			else
+			{
+				for (idxCut = numEntrs; idxCut > 0; idxCut--)
+				{
+					if constexpr (L == QUANTITY::GREATER)
+					{
+						if (m_vBook[idxCut - 1].price > priceQuantity.price)
+						{
+							isCut = true;
+							break;
+						}
+					}
+					else if constexpr (L == QUANTITY::LESS)
+					{
+						if (m_vBook[idxCut - 1].price < priceQuantity.price)
+						{
+							isCut = true;
+							break;
+						}
+					}
+
+					if (m_vBook[idxCut - 1].price == priceQuantity.price)
+					{
+						isCut = false;
+						m_vBook[idxCut - 1].quantity = priceQuantity.quantity;
 						break;
 					}
 				}
-					
-				if (m_vBook[idxCut - 1].price == priceQuantity.price)
-				{
-					isCut = false;
-					m_vBook[idxCut - 1].quantity = priceQuantity.quantity;
-					break;
-				}
 			}
-
+			
 			if (isCut)
 			{
 				if (idxCut == 0)
 				{
-					if (m_nEntrs == m_vBook.size())
-					{
-						m_vBook.push_back({ 0.0, 0.0 });
-					}
-					for (int32_t idx = (int32_t)m_nEntrs - 1; idx >= (int32_t)idxCut; idx--)
+					m_vBook.push_back({ 0.0, 0.0 });
+					for (int32_t idx = (int32_t)numEntrs - 1; idx >= (int32_t)idxCut; idx--)
 					{
 						m_vBook[idx - idxCut + 1] = m_vBook[idx];
 					}
-					m_nEntrs++;
 				}
 				else
 				{
 					//101 | 103 | 105
 					//0    1      2    3
 					//101 | 103 | 105 | 106
-					for (int32_t idx = (int32_t)idxCut; idx < (int32_t)m_nEntrs; idx++)
+					for (int32_t idx = (int32_t)idxCut; idx < (int32_t)numEntrs; idx++)
 					{
 						m_vBook[idx - idxCut + 1] = m_vBook[idx];
 					}
-					m_nEntrs = m_nEntrs - idxCut + 1; 
+					m_vBook.resize(numEntrs - idxCut + 1); 
 				}
 				m_vBook[0] = priceQuantity;
 			}
