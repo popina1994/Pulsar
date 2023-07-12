@@ -49,7 +49,7 @@ namespace Pulsar
         * https://stackoverflow.com/questions/7728478/c-template-class-function-with-arbitrary-container-type-how-to-define-it
         */ 
         template <typename Container>  requires std::ranges::contiguous_range<Container>
-        void replace(const Container& vAsks, const Container& vBids)
+        void replace(const Container& vBids, const Container& vAsks)
         {
             m_vAsks.replace(vAsks);
             m_vBids.replace(vBids);
@@ -61,8 +61,8 @@ namespace Pulsar
         template <typename Container> requires std::ranges::contiguous_range<Container>
         void replace(const BookDepth<Container>& bookDepth)
         {
-            m_vAsks.replace(bookDepth.m_vAsks);
             m_vBids.replace(bookDepth.m_vBids);
+            m_vAsks.replace(bookDepth.m_vAsks);
         }
         
         /**
@@ -70,8 +70,8 @@ namespace Pulsar
         */ 
         void update_bbo(const PriceQuantity& newBid, const PriceQuantity& newAsk)
         {
-            m_vBids.template cut<QUANTITY::GREATER>(newBid);
             m_vAsks.template cut<QUANTITY::LESS>(newAsk);
+            m_vBids.template cut<QUANTITY::GREATER>(newBid);
         }
 
         
@@ -79,9 +79,15 @@ namespace Pulsar
         * @brief Retrieve the book(in canonical order). This should output something similar to the input for `replace()`.
         */ 
         // 
-        const std::pair<const ContainerGl&, const ContainerGl&> extract(void)
+        const std::pair<const std::vector<PriceQuantity>, const std::vector<PriceQuantity>> extract(void)
         {
-            return std::make_pair(std::cref(m_vBids.getBook()), std::cref(m_vAsks.getBook()));
+            std::vector<PriceQuantity> vAsks;
+            std::vector<PriceQuantity> vBids;
+            
+            vBids = m_vBids.getBookCopy();
+            vAsks = m_vAsks.getBookCopy();
+
+            return std::make_pair(std::move(vBids), std::move(vAsks));
         }
         
         /**
@@ -98,23 +104,23 @@ namespace Pulsar
                 ss << "[" << std::format("{:3}", idx + 1) << "] ";
                 if (idx < nBids)
                 {
-                    ss << "[" << std::format("{: 10.5f}", m_vBids[idx].quantity) << "]";
-                    ss << " " << std::format("{:<10.3f}", m_vBids[idx].price) << " | ";
+                    ss << "[" << std::format("{: 10.5f}", m_vBids[nBids - idx - 1].quantity) << "]";
+                    ss << " " << std::format("{:<10.3f}", m_vBids[nBids - idx - 1].price) << " | ";
                 }
                 else
                 {
-                    ss << "[" << std::format("{:<10}", "-") << "]";
-                    ss << "[" << std::format("{:<10}", "-") << "]";
+                    ss << "[" << std::format("{:<10}", "----------") << "]";
+                    ss << " " << std::format("{:<10}", "----------") << "]";
                 }
                 if (idx < nAsks)
                 {
-                    ss << " " << std::format("{:10.3f}", m_vAsks[idx].price);
-                    ss << "[" << std::format("{:<10.5f}", m_vAsks[idx].quantity) << "]";
+                    ss << " " << std::format("{:10.3f}", m_vAsks[nAsks - idx - 1].price);
+                    ss << "[" << std::format("{:<10.5f}", m_vAsks[nAsks - idx - 1].quantity) << "]";
                 }
                 else
                 {
-                    ss << "[" << std::format("{:<10}", "-") << "]";
-                    ss << "[" << std::format("{:<10}", "-") << "]";
+                    ss << " " << std::format("{:<10}", "----------") << "";
+                    ss << "[" << std::format("{:<10}", "----------") << "]";
                 }
                 ss << std::endl;
             }
